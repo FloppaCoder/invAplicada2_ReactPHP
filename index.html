@@ -4,17 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Página de Inicio</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-sky-300 min-h-screen flex items-center justify-center">
+<body>
 
-  <div class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md text-center">
-    <h1 class="text-3xl font-bold text-violet-700 mb-4">Bienvenido al sitio web con ReactPHP</h1>
-    <a 
-      href="/contact" 
-      class="inline-block mt-4 bg-violet-600 text-white py-2 px-6 rounded-lg hover:bg-violet-700 transition duration-200"
-    >
-      Ir a Contacto
+  <div class="container">
+    <h1 class="title">Bienvenido al sitio web con ReactPHP</h1>
+    <a href="/contact" class="button">
+      Agregar Contacto
+    </a>
+    <a href="/data" class="button">
+      Ver Contactos
     </a>
   </div>
 

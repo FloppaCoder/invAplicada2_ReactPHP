@@ -4,33 +4,51 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Contacto</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-sky-300 min-h-screen flex items-center justify-center">
+<body>
 
-  <div class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-    <h1 class="text-3xl font-bold text-center text-violet-700 mb-6">Contacto</h1>
+  <div class="container">
+    <h1 class="title">Contacto</h1>
 
-    <form action="/contact" method="post" class="space-y-4">
+    <div id="message">
+      <!-- Mensaje de éxito se mostrará aquí -->
+    </div>
+
+    <form action="/contact" method="post" class="form" enctype="application/x-www-form-urlencoded">
       <div>
-        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nombre:</label>
-        <input 
-          type="text" 
-          id="name" 
-          name="name" 
-          required
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-violet-500"
-        />
+        <label for="name" class="label">Nombre:</label>
+        <input type="text" id="name" name="name" required class="input" />
       </div>
 
-      <button 
-        type="submit" 
-        class="w-full bg-violet-600 text-white py-2 rounded-lg hover:bg-violet-700 transition duration-200"
-      >
+      <button type="submit" class="button-submit">
         Enviar
       </button>
     </form>
   </div>
 
 </body>
+
+<script>
+  // Función para obtener parámetros de la URL
+  function getUrlParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+  }
+
+  // Leer el parámetro 'success' de la URL
+  const successMessage = getUrlParameter('success');
+
+  if (successMessage === 'true') {
+      // Si el parámetro 'success' está presente, mostrar el mensaje
+      const messageDiv = document.getElementById('message');
+      messageDiv.innerHTML = `
+      <div class="alert-success" role="alert">
+          <strong class="font-bold">¡Éxito!</strong>
+          <span class="block sm:inline">Registro guardado correctamente.</span>
+      </div>
+      `;
+  }
+</script>
+
 </html>

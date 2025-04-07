@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lista de Contactos</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+	<h1 class="title">Lista de Contactos</h1>
+
+	<table id="contactsTable" class="table">
+	<thead>
+		<tr>
+		<th>Nombre</th>
+		<th>Acciones</th>
+		</tr>
+	</thead>
+	<tbody>
+		<!-- Los registros se cargarán aquí -->
+	</tbody>
+	</table>
+</div>
+
+</body>
+
+<script>
+// Función para cargar los contactos desde el endpoint /data
+function loadContacts() {
+	fetch('/get-data')
+	.then(response => response.json())
+	.then(data => {
+		const tableBody = document.querySelector('#contactsTable tbody');
+		tableBody.innerHTML = ''; // Limpiar la tabla antes de agregar nuevos datos
+		
+		data.forEach(contact => {
+		// Crear una fila por cada contacto
+		const row = document.createElement('tr');
+		
+		const nameCell = document.createElement('td');
+		nameCell.textContent = contact.name; // Mostrar el nombre del contacto
+		row.appendChild(nameCell);
+
+		const actionsCell = document.createElement('td');
+		actionsCell.innerHTML = `
+			<button class="button-edit" onclick="editContact(${contact.id})">Editar</button>
+			<button class="button-delete" onclick="deleteContact(${contact.id})">Eliminar</button>
+		`;
+		row.appendChild(actionsCell);
+
+		tableBody.appendChild(row); // Agregar la fila a la tabla
+		});
+	})
+	.catch(error => {
+		console.error('Error al cargar los contactos:', error);
+	});
+}
+
+// Función para eliminar un contacto
+function deleteContact(contactId) {
+	if (confirm('¿Estás seguro de que deseas eliminar este contacto?')) {
+	// Realizar una solicitud para eliminar el contacto
+	fetch(`/data?id=${contactId}`, {
+		method: 'DELETE'
+	})
+		.then(response => {
+		if (response.ok) {
+			alert('Contacto eliminado con éxito');
+			location.reload(); // Recargar la lista de contactos después de eliminar
+		} else {
+			alert('Error al eliminar el contacto');
+		}
+		})
+		.catch(error => {
+		console.error('Error al eliminar el contacto:', error);
+		});
+	}
+}
+
+// Cargar los contactos cuando la página se cargue
+window.onload = loadContacts;
+</script>
+
+</html>
