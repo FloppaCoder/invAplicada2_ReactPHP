@@ -128,6 +128,114 @@ $server = new HttpServer(function (ServerRequestInterface $request) use ($loop, 
                 );
             }
 
+        // Metodo Update de contacto
+        case '/edit-contact.html':
+            return new React\Http\Message\Response(
+                200, // OK
+                ['Content-Type' => 'text/html'],
+                file_get_contents(__DIR__ . '/edit-contact.html') // Cargar el archivo edit-contact.html
+            );
+
+
+        // Obtener datos de un contacto específico por su ID
+        case '/get-contact':
+            if ($request->getMethod() === 'GET') {
+                $queryParams = $request->getQueryParams();
+                $id = isset($queryParams['id']) ? $queryParams['id'] : null;
+
+                if ($id === null) {
+                    return new React\Http\Message\Response(
+                        400, // Bad Request
+                        ['Content-Type' => 'text/plain'],
+                        'Error: El ID del contacto es obligatorio.'
+                    );
+                }
+
+                return $db->query('SELECT * FROM contactos WHERE id = ?', [$id])->then(
+                    function (QueryResult $result) {
+                        if (count($result->resultRows) === 0) {
+                            return new React\Http\Message\Response(
+                                404, // No encontrado
+                                ['Content-Type' => 'text/plain'],
+                                'Error: Contacto no encontrado.'
+                            );
+                        }
+
+                        // Devolver el contacto en formato JSON
+                        return new React\Http\Message\Response(
+                            200, // OK
+                            ['Content-Type' => 'application/json'],
+                            json_encode($result->resultRows[0])
+                        );
+                    },
+                    function (Exception $e) {
+                        return new React\Http\Message\Response(
+                            500, // Error interno
+                            ['Content-Type' => 'text/plain'],
+                            'Error al obtener el contacto: ' . $e->getMessage()
+                        );
+                    }
+                );
+            }
+
+        // Actualizar los datos de un contacto específico
+        case '/update-contact':
+            if ($request->getMethod() === 'PUT') {
+                $queryParams = $request->getQueryParams();
+                $id = isset($queryParams['id']) ? $queryParams['id'] : null;
+
+                if ($id === null) {
+                    return new React\Http\Message\Response(
+                        400, // Bad Request
+                        ['Content-Type' => 'text/plain'],
+                        'Error: El ID del contacto es obligatorio.'
+                    );
+                }
+
+                $putData = json_decode($request->getBody()->getContents(), true);
+
+                // Verificar que los campos 'name', 'email' y 'phone' estén presentes
+                if (
+                    !isset($putData['name']) || empty(trim($putData['name'])) ||
+                    !isset($putData['email']) || empty(trim($putData['email'])) ||
+                    !isset($putData['phone']) || empty(trim($putData['phone']))
+                ) {
+                    return new React\Http\Message\Response(
+                        400, // Bad Request
+                        ['Content-Type' => 'text/plain'],
+                        'Error: Todos los campos son obligatorios.'
+                    );
+                }
+
+                // Sanear los datos
+                $name = trim($putData['name']);
+                $email = trim($putData['email']);
+                $phone = trim($putData['phone']);
+
+                // Realizar la actualización en la base de datos
+                return $db->query(
+                    'UPDATE contactos SET name = ?, email = ?, phone = ? WHERE id = ?',
+                    [$name, $email, $phone, $id]
+                )->then(
+                        function () {
+                            return new React\Http\Message\Response(
+                                200, // OK
+                                ['Content-Type' => 'application/json'],
+                                json_encode(['success' => true])
+                            );
+                        },
+                        function (Exception $e) {
+                            return new React\Http\Message\Response(
+                                500, // Error interno
+                                ['Content-Type' => 'text/plain'],
+                                'Error al actualizar el contacto: ' . $e->getMessage()
+                            );
+                        }
+                    );
+            }
+            break;
+
+
 
         case '/css/style.css':
             return new React\Http\Message\Response(

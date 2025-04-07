@@ -98,6 +98,11 @@
       }
     }
 
+	//Funcion de EditarContacto
+	function editContact(contactId) {
+    window.location.href = `/edit-contact.html?id=${contactId}`;
+  }
+
     // Cargar los contactos cuando la página se cargue
     window.onload = loadContacts;
   </script>

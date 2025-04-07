@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editar Contacto</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <div style="margin-bottom: 20px">
+      <button onclick="window.location.href='/data'" class="button-back">
+        Volver a la Lista de Contactos
+      </button>
+    </div>
+    <h1 class="title">Editar Contacto</h1>
+
+    <div id="message"></div>
+
+    <form id="editForm" class="form" onsubmit="return validateForm()">
+      <div>
+        <label for="name" class="label">Nombre Completo:</label>
+        <input type="text" id="name" name="name" required class="input" placeholder="Nombre Completo de Contacto" />
+      </div>
+
+      <div>
+        <label for="email" class="label">Correo Electrónico:</label>
+        <input type="email" id="email" name="email" required class="input" placeholder="ejemplo@correo.com"/>
+      </div>
+
+      <div>
+        <label for="phone" class="label">Teléfono:</label>
+        <input 
+          type="tel" 
+          id="phone" 
+          name="phone" 
+          required 
+          class="input" 
+          maxlength="8" 
+          placeholder="+503 (8 dígitos)" 
+        />
+      </div>
+
+      <button type="submit" class="button-submit">Actualizar</button>
+    </form>
+  </div>
+
+  <script>
+    // Función para obtener parámetros de la URL
+    function getUrlParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    // Obtener el ID del contacto desde la URL
+    const contactId = getUrlParameter("id");
+
+    // Cargar los datos del contacto y llenar el formulario
+    fetch(`/get-contact?id=${contactId}`)
+      .then((response) => response.json())
+      .then((contact) => {
+        document.getElementById("name").value = contact.name;
+        document.getElementById("email").value = contact.email;
+        document.getElementById("phone").value = contact.phone;
+      })
+      .catch((error) => {
+        console.error("Error al cargar los datos del contacto:", error);
+      });
+
+    // Función de validación del formulario
+    function validateForm() {
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const messageDiv = document.getElementById("message");
+
+      // Limpiar cualquier mensaje previo
+      messageDiv.innerHTML = '';
+
+      // Validar el nombre completo (mínimo 2 nombres y 2 apellidos)
+      const nameRegex = /^([a-zA-ZáéíóúÁÉÍÓÚ]+\s+){3}[a-zA-ZáéíóúÁÉÍÓÚ]+$/;
+      if (!nameRegex.test(name)) {
+        messageDiv.innerHTML = `<div class="alert-error" role="alert">
+          <strong class="font-bold">¡Error!</strong>
+          <span class="block sm:inline">El nombre debe contener al menos dos nombres y dos apellidos.</span>
+        </div>`;
+        return false;  // Detener el envío del formulario
+      }
+
+      // Validar el correo electrónico con una expresión regular más robusta
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(email)) {
+        messageDiv.innerHTML = `<div class="alert-error" role="alert">
+          <strong class="font-bold">¡Error!</strong>
+          <span class="block sm:inline">Por favor, ingresa un correo electrónico válido.</span>
+        </div>`;
+        return false;  // Detener el envío del formulario
+      }
+
+      // Validar el número de teléfono (8 dígitos)
+      const phoneRegex = /^\d{8}$/;
+      if (!phoneRegex.test(phone)) {
+        messageDiv.innerHTML = `<div class="alert-error" role="alert">
+          <strong class="font-bold">¡Error!</strong>
+          <span class="block sm:inline">El número de teléfono debe contener exactamente 8 dígitos de <strong class="font-bold">números</strong>.</span>
+        </div>`;
+        return false;  // Detener el envío del formulario
+      }
+
+      return true; // Si todas las validaciones pasan, permitir el envío
+    }
+
+    // Manejar el envío del formulario para actualizar el contacto
+    document.getElementById("editForm").addEventListener("submit", function (event) {
+      // Prevenir el envío del formulario si las validaciones no son correctas
+      if (!validateForm()) {
+        event.preventDefault(); // Evitar la ejecución si la validación falla
+        return;
+      }
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const phone = document.getElementById("phone").value;
+
+      fetch(`/update-contact?id=${contactId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          phone: phone,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            alert("Contacto actualizado con éxito.");
+            window.location.href = "/data"; // Volver a la lista
+          } else {
+            alert("Error al actualizar el contacto.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error al actualizar el contacto:", error);
+        });
+    });
+  </script>
+</body>
+</html>
