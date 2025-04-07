@@ -123,11 +123,11 @@ $server = new HttpServer(function (ServerRequestInterface $request) use ($loop, 
             }
         
 
-        case '/style.css':
+        case '/css/style.css':
             return new React\Http\Message\Response(
                 200,
                 ['Content-Type' => 'text/css'],
-                file_get_contents(__DIR__ . '/style.css')
+                file_get_contents(__DIR__ . '/css/style.css')
             );
 
         default:
