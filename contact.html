@@ -1,54 +1,124 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Contacto</title>
-  <link rel="stylesheet" href="./css/style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contacto</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Botón para volver al index -->
+      <div style="margin-bottom: 20px">
+        <button onclick="window.location.href='/'" class="button-back">
+          Volver a Inicio
+        </button>
+      </div>
+      <h1 class="title">Lista de Contactos</h1>
+      <h1 class="title">Contacto</h1>
 
-  <div class="container">
-    <h1 class="title">Contacto</h1>
-
-    <div id="message">
-      <!-- Mensaje de éxito se mostrará aquí -->
-    </div>
-
-    <form action="/contact" method="post" class="form" enctype="application/x-www-form-urlencoded">
-      <div>
-        <label for="name" class="label">Nombre:</label>
-        <input type="text" id="name" name="name" required class="input" />
+      <div id="message">
+        <!-- Los mensajes de error o éxito se mostrarán aquí -->
       </div>
 
-      <button type="submit" class="button-submit">
-        Enviar
-      </button>
-    </form>
-  </div>
+      <form
+        id="contactForm"
+        action="/contact"
+        method="post"
+        class="form"
+        enctype="application/x-www-form-urlencoded"
+        onsubmit="return validateForm()"
+      >
+        <div>
+          <label for="name" class="label">Nombre Completo:</label>
+          <input type="text" id="name" name="name" required class="input" placeholder="Nombre Completo de Contacto" />
+        </div>
 
-</body>
+        <div>
+          <label for="email" class="label">Correo Electrónico:</label>
+          <input type="email" id="email" name="email" required class="input" placeholder="ejemplo@correo.com"/>
+        </div>
 
-<script>
-  // Función para obtener parámetros de la URL
-  function getUrlParameter(name) {
+        <div>
+          <label for="phone" class="label">Teléfono:</label>
+          <input 
+            type="tel" 
+            id="phone" 
+            name="phone" 
+            required 
+            class="input" 
+            maxlength="8" 
+            placeholder="+503 (8 dígitos)" 
+          />
+        </div>
+
+        <button type="submit" class="button-submit">Enviar</button>
+      </form>
+    </div>
+  </body>
+
+  <script>
+    // Función para obtener parámetros de la URL
+    function getUrlParameter(name) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(name);
-  }
+    }
 
-  // Leer el parámetro 'success' de la URL
-  const successMessage = getUrlParameter('success');
+    // Leer el parámetro 'success' de la URL
+    const successMessage = getUrlParameter("success");
 
-  if (successMessage === 'true') {
+    if (successMessage === "true") {
       // Si el parámetro 'success' está presente, mostrar el mensaje
-      const messageDiv = document.getElementById('message');
-      messageDiv.innerHTML = `
+      const messageDiv = document.getElementById("message");
+      messageDiv.innerHTML = ` 
       <div class="alert-success" role="alert">
           <strong class="font-bold">¡Éxito!</strong>
           <span class="block sm:inline">Registro guardado correctamente.</span>
       </div>
       `;
-  }
-</script>
+    }
 
+    // Función de validación del formulario
+    function validateForm() {
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const messageDiv = document.getElementById("message");
+
+      // Limpiar cualquier mensaje previo
+      messageDiv.innerHTML = '';
+
+      // Validar el nombre completo (mínimo 2 nombres y 2 apellidos)
+      const nameRegex = /^([a-zA-ZáéíóúÁÉÍÓÚ]+\s+){3}[a-zA-ZáéíóúÁÉÍÓÚ]+$/;
+      if (!nameRegex.test(name)) {
+        messageDiv.innerHTML = `<div class="alert-error" role="alert">
+          <strong class="font-bold">¡Error!</strong>
+          <span class="block sm:inline">El nombre debe contener al menos dos nombres y dos apellidos.</span>
+        </div>`;
+        return false;
+      }
+
+      // Validar el correo electrónico con una expresión regular más robusta
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(email)) {
+        messageDiv.innerHTML = `<div class="alert-error" role="alert">
+          <strong class="font-bold">¡Error!</strong>
+          <span class="block sm:inline">Por favor, ingresa un correo electrónico válido.</span>
+        </div>`;
+        return false;
+      }
+
+      // Validar el número de teléfono (8 dígitos)
+      const phoneRegex = /^\d{8}$/;
+      if (!phoneRegex.test(phone)) {
+        messageDiv.innerHTML = `<div class="alert-error" role="alert">
+          <strong class="font-bold">¡Error!</strong>
+          <span class="block sm:inline">El número de teléfono debe contener exactamente 8 dígitos de <strong class="font-bold">números</strong>.</span>
+        </div>`;
+        return false;
+      }
+
+      return true; // Si todas las validaciones pasan, enviar el formulario
+    }
+  </script>
 </html>

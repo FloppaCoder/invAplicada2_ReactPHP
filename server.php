@@ -26,21 +26,27 @@ $server = new HttpServer(function (ServerRequestInterface $request) use ($loop, 
         case '/contact':
             if ($request->getMethod() === 'POST') {
                 $postData = $request->getParsedBody();
-        
-                // Verificar si el campo 'name' está presente y no está vacío
-                if (!isset($postData['name']) || empty(trim($postData['name']))) {
+
+                // Verificar que los campos 'name', 'email' y 'phone' estén presentes y no vacíos
+                if (
+                    !isset($postData['name']) || empty(trim($postData['name'])) ||
+                    !isset($postData['email']) || empty(trim($postData['email'])) ||
+                    !isset($postData['phone']) || empty(trim($postData['phone']))
+                ) {
                     return new React\Http\Message\Response(
                         400, // Bad Request
                         ['Content-Type' => 'text/plain'],
-                        'Error: El campo nombre es obligatorio.'
+                        'Error: Todos los campos son obligatorios.'
                     );
                 }
-        
-                // Sanear el nombre antes de guardarlo
+
+                // Sanear los datos antes de guardarlos
                 $name = trim($postData['name']);
-        
+                $email = trim($postData['email']);
+                $phone = trim($postData['phone']);
+
                 // Realizar la inserción en la base de datos
-                return $db->query('INSERT INTO contactos (name) VALUES (?)', [$name])->then(
+                return $db->query('INSERT INTO contactos (name, email, phone) VALUES (?, ?, ?)', [$name, $email, $phone])->then(
                     function () {
                         // Redirigir a /contact con un parámetro de éxito
                         return new React\Http\Message\Response(
@@ -79,7 +85,7 @@ $server = new HttpServer(function (ServerRequestInterface $request) use ($loop, 
                     ['Content-Type' => 'text/html'],
                     $htmlContent
                 );
-            }elseif ($request->getMethod() === 'DELETE') {
+            } elseif ($request->getMethod() === 'DELETE') {
                 // Obtener el ID de la URL
                 $queryParams = $request->getQueryParams();
                 $id = isset($queryParams['id']) ? $queryParams['id'] : null;
@@ -121,7 +127,7 @@ $server = new HttpServer(function (ServerRequestInterface $request) use ($loop, 
                     }
                 );
             }
-        
+
 
         case '/css/style.css':
             return new React\Http\Message\Response(
@@ -132,8 +138,8 @@ $server = new HttpServer(function (ServerRequestInterface $request) use ($loop, 
 
         default:
             return new React\Http\Message\Response(
-                404, 
-                ['Content-Type' => 'text/plain'], 
+                404,
+                ['Content-Type' => 'text/plain'],
                 'Error 404: Pagina no encontrada en el sitio'
             );
     }
